@@ -1,0 +1,44 @@
+name: Build U-Boot
+run-name: Build U-Boot for cotrust_g101
+
+on:
+  workflow_dispatch:
+
+jobs:
+  uboot:
+    runs-on: ubuntu-22.04
+    name: Build U-Boot
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Checkout LFS
+        shell: bash
+        run: git lfs fetch && git lfs checkout
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          sudo apt-get update && sudo apt-get upgrade -y
+          sudo apt-get install -y build-essential gcc-arm-linux-gnueabihf bison flex \
+          libssl-dev bc rsync kmod cpio xz-utils fakeroot parted \
+          udev dosfstools uuid-runtime git-lfs device-tree-compiler python3 \
+          python-is-python3 fdisk bc debhelper python3-pyelftools python3-setuptools \
+          python3-distutils python3-pkg-resources swig libfdt-dev libpython3-dev
+
+      - name: Build U-Boot
+        shell: bash
+        run: |
+          export CROSS_COMPILE=arm-linux-gnueabihf-
+          export ARCH=arm
+          make distclean || true
+          make cotrust_g101_defconfig
+          make -j$(nproc)
+
+      - name: Upload U-Boot Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: u-boot-sunxi-with-spl.bin
+          path: ./u-boot-sunxi-with-spl.bin
+          if-no-files-found: error
