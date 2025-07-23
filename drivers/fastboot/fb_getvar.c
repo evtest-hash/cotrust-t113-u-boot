@@ -9,6 +9,7 @@
 #include <fastboot-internal.h>
 #include <fb_mmc.h>
 #include <fb_nand.h>
+#include <fb_spi_nand.h>
 #include <fs.h>
 #include <part.h>
 #include <version.h>
